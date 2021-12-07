@@ -1,12 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import { merge, race, EMPTY } from "rxjs";
-import { expand, tap, repeat, delay } from "rxjs/operators";
+import { merge, race, EMPTY, Observable } from "rxjs";
+import { expand, tap, repeat, delay, map } from "rxjs/operators";
 
 interface SwapiShapeWeCareAbout {
   next: string;
-  results: object[];
+  results: {
+    name: string;
+  }[];
 }
 @Injectable({
   providedIn: 'root'
@@ -15,7 +17,7 @@ export class SwapiService {
 
   constructor(private http: HttpClient) { }
 
-  loadPlanets() {
+  loadPlanets(): Observable<SwapiShapeWeCareAbout> {
     
     //return this.http.get("http://swapi.dev/api/planets/");
 
@@ -29,11 +31,19 @@ export class SwapiService {
     // );
 
     return pageOne.pipe(
-      tap(x => console.log("tap", x))
+      tap(x => console.log(x))
       , expand(
-        x => x.next ? this.http.get(x.next) : EMPTY
+        x => x.next ? this.http.get<SwapiShapeWeCareAbout>(x.next) : EMPTY
       )
       //, repeat(2)
+      //, tap(x => console.log(x))
+      , map(x => ({
+        next: x.next
+        , results: x.results.map(y => ({
+          name: y.name
+        }))
+      }))
+      //, tap(x => console.log(x))
     );
 
   }

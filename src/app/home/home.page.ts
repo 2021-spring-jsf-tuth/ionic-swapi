@@ -19,7 +19,7 @@ export class HomePage implements OnInit {
 
         this.planets = [
           ...this.planets
-          , ...(data as any).results
+          , ...data.results
         ].sort((a, b) => a.name.toUpperCase() > b.name.toUpperCase() ? 1 : -1);
 
       }
